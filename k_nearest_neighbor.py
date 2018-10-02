@@ -39,6 +39,8 @@ def calculate_2way_distance(t1, t2):
         sum_total += two_point_diffsq
     return math.sqrt(sum_total)
 
+#  TEST HERE
+
 
 def main():
     t1 = (5, 10)
