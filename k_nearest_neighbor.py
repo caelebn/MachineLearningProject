@@ -9,7 +9,7 @@ import math
 #           It does this by calculating all distances between tuples 0 and 1, 0 and 2, ..., 0 and n-1, 1 and 2,
 #           ..., 1 and n, ..., n-1, n. It saves each of these couple of points and their correlating distance into a
 #           tuple, which is then stored into a list. This list of tuples is returned as the output.
-#  FUNCTION STATUS: INCOMPLETE
+#  FUNCTION STATUS: COMPLETE (NEEDS TESTING)
 
 
 def calculate_distance_list(tuples):
