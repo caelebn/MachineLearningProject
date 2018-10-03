@@ -45,9 +45,10 @@ def calculate_2way_distance(t1, t2):
 def main():
     t1 = (5, 10)
     t2 = (10, 15)
+    t3 = (50, 100)
     distance = calculate_2way_distance(t1, t2)
     print('distance', distance)
-    distances = calculate_distance_list([t1, t2])
+    distances = calculate_distance_list([t1, t2, t3])
     print('distance tuples', distances)
 
 
