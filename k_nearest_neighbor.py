@@ -1,4 +1,14 @@
 import math
+import gzip
+
+
+def parse():
+    #  path = sys.path.append(os.path.realpath('/Datasets/reviews_Musical_Instruments_5.json.gz'))
+    path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+    g = gzip.open(path, 'r')
+    for l in g:
+        yield eval(l)
+
 
 #  calculate_distance_list(int tuple_size, tuples [])
 #  INPUTS: int tuple_size- the size of each of the tuples
@@ -39,7 +49,45 @@ def calculate_2way_distance(t1, t2):
         sum_total += two_point_diffsq
     return math.sqrt(sum_total)
 
-#  TEST HERE
+#  find_nearest_neighbor(query, tuples)
+#  INPUTS: query- the tuple to be compared to the list of tuples.
+#          tuples- the pre-existing list of tuples that will be compared against.
+#  OUTPUTS: tuple(query, nearest_neighbor, distance)- a tuple containing the original query and its nearest neighbor,
+#               along with the distance between them
+#  INFO: Goes through the tuples list and compares the distance to the query, saving off the shortest distance and
+#           tuple.
+#  FUNCTION STATUS: NEEDS REVIEW
+
+
+def find_nearest_neighbor(query, tuples):
+    shortest_distance = 99999999
+    closest_tuple = tuples[0]
+    for i in range(0, len(tuples)):
+        curr_distance = calculate_2way_distance(query, tuples[i])
+        print('', query, ' ', tuples[i], ' distance = ', curr_distance)
+        if curr_distance < shortest_distance:
+            shortest_distance = curr_distance
+            closest_tuple = tuples[i]
+    return query, closest_tuple, shortest_distance
+
+#  define_base_review_tuples()
+#  INPUTS: NONE
+#  OUTPUTS: review_tuples- a list of all base review tuples
+#  INFO: goes through the dataset and puts all data into a list of tuples
+#        including final stars given (overall), review text (reviewText), and helpfulness (helpful)
+#  FUNCTION STATUS: INCOMPLETE
+
+
+def define_base_review_tuples():
+    review_tuples = []
+    count = 0
+    for review in parse():
+        review_tuples.append((review['overall'], review['reviewText'], review['helpful']))
+        count += 1
+    print(sum(review_tuples[i][0] for i in range(0, count)) / len(review_tuples))
+    print('Review at index 25 = ', review_tuples[25][1])
+    print('\tHelpfulness: ', review_tuples[25][2])
+    print('Count: ', count)
 
 
 def main():
@@ -50,6 +98,19 @@ def main():
     print('distance', distance)
     distances = calculate_distance_list([t1, t2, t3])
     print('distance tuples', distances)
+
+    print('Enter query tuple[0]: ')
+    p1 = input('INT: ')
+    print('Enter query tuple[1]: ')
+    p2 = input('INT: ')
+    print('Enter query tuple[2]: ')
+    p3 = input('INT: ')
+    query = (int(p1), int(p2), int(p3))
+
+    knn = find_nearest_neighbor(query, [t1, t2, t3])
+    print('KNN: ', knn)
+
+    define_base_review_tuples()
 
 
 main()
