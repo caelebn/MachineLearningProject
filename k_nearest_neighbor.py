@@ -2,9 +2,7 @@ import math
 import gzip
 
 
-def parse():
-    #  path = sys.path.append(os.path.realpath('/Datasets/reviews_Musical_Instruments_5.json.gz'))
-    path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+def parse(path):
     g = gzip.open(path, 'r')
     for l in g:
         yield eval(l)
@@ -71,23 +69,38 @@ def find_nearest_neighbor(query, tuples):
     return query, closest_tuple, shortest_distance
 
 #  define_base_review_tuples()
-#  INPUTS: NONE
+#  INPUTS: path - the relative path to the dataset
 #  OUTPUTS: review_tuples- a list of all base review tuples
 #  INFO: goes through the dataset and puts all data into a list of tuples
 #        including final stars given (overall), review text (reviewText), and helpfulness (helpful)
 #  FUNCTION STATUS: INCOMPLETE
 
 
-def define_base_review_tuples():
+def define_base_review_tuples(path):
     review_tuples = []
     count = 0
-    for review in parse():
+    for review in parse(path):
         review_tuples.append((review['overall'], review['reviewText'], review['helpful']))
         count += 1
     print(sum(review_tuples[i][0] for i in range(0, count)) / len(review_tuples))
-    print('Review at index 25 = ', review_tuples[25][1])
-    print('\tHelpfulness: ', review_tuples[25][2])
+    print('Review at index 1 = ', review_tuples[1][1])
+    print('\tHelpfulness: ', review_tuples[1][2])
     print('Count: ', count)
+    return review_tuples
+
+#  count_review_words(base_tuples)
+#  INPUTS: base_tuples - the list of base review tuples
+#  OUTPUTS: num_review_words - a list of the number of review words for each review.
+#  INFO: parses through the base_tuples and counts the number of words in each review, storing the result
+#        in a separate list.
+#  FUNCTION STATUS: INCOMPLETE
+
+
+def count_review_words(base_tuples):
+    num_review_words = []
+    for curr_tuple in base_tuples:
+        num_review_words.append(len(curr_tuple[1].split()))
+    return num_review_words
 
 
 def main():
@@ -110,7 +123,10 @@ def main():
     knn = find_nearest_neighbor(query, [t1, t2, t3])
     print('KNN: ', knn)
 
-    define_base_review_tuples()
+    path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+    review_tuples = define_base_review_tuples(path)
+    num_review_words = count_review_words(review_tuples)
+    print('WORD COUNT OF INDEX 10260 = ', num_review_words[10260])
 
 
 main()
