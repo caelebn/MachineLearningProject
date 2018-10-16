@@ -115,7 +115,8 @@ def make_review_list(path):
 def make_review_tuples(path):
     reviews = make_review_list(path)
     review_tuples = []
-    for curr in reviews:
+    for index, curr in enumerate(reviews):
+        print('Making tuple ', index)
         t1 = curr.get_points()
         t2 = curr.get_overall()
         t3 = (t1, t2)
