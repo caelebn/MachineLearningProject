@@ -8,7 +8,9 @@ class Query:
         self.net_pos_weight = 1000
         self.help_weight = 100
         self.help_votes_weight = 20
-        self.spec_char_weight = 10
+        self.spec_char_weight = 50
+        self.pos_words_weight = 30
+        self.neg_words_weight = 50
 
     #  Accessor Methods
     def get_helpful_percent(self):
@@ -62,6 +64,8 @@ class Query:
         # print(pos_list)
 
         net_pos_count = 0
+        pos_words = 0
+        neg_words = 0
         last_word_not = 1  # -1 for last word not, 1 for not last word not
         n_text = self.text.strip('.')
         for word in n_text.split():
@@ -76,11 +80,15 @@ class Query:
                 # print('word is not')
                 last_word_not = -1 * last_word_not
             # print('Curr val: ', curr_val)
+            if curr_val >= 1:
+                pos_words += 1
+            elif curr_val <= -1:
+                neg_words += 1
             net_pos_count += curr_val
             # print('Net pos count: ', net_pos_count)
 
         # print('POS COUNT: ', net_pos_count)
-        return int(net_pos_count)
+        return int(net_pos_count), pos_words, neg_words
 
     def get_points(self):
         return (self.get_helpful_percent() * self.help_weight,
@@ -88,4 +96,6 @@ class Query:
                 self.num_uppercase_words(),
                 self.num_special_chars() * self.spec_char_weight,
                 self.count_num_words(),
-                self.get_net_positivity() * self.net_pos_weight)
+                self.get_net_positivity()[0] * self.net_pos_weight,
+                self.get_net_positivity()[1] * self.pos_words_weight,
+                self.get_net_positivity()[2] * self.neg_words_weight)

@@ -2,6 +2,7 @@ import math
 import gzip
 import Review
 import Query
+import pickle
 
 
 def parse(path):
@@ -122,6 +123,9 @@ def make_review_tuples(path):
         t3 = (t1, t2)
         # print('Making review tuple of: ', index)
         review_tuples.append(t3)
+    with open('Datasets/tuple_data.pkl', 'wb') as f:
+        pickle.dump(review_tuples, f)
+    f.close()
     return review_tuples
 
 #  count_review_words(base_tuples)
@@ -144,6 +148,7 @@ def main():
     help1 = int(input('Enter help1'))
     help2 = int(input('Enter help2'))
     time = input('Enter date: ')
+    load = str(input('Load data? (Y/N)'))
 
     query = Query.Query([help1, help2], text, time)
     query_points = query.get_points()
@@ -151,8 +156,13 @@ def main():
     # review_tuples = define_base_review_tuples(path)
     # num_review_words = count_review_words(review_tuples)
     # print('WORD COUNT OF INDEX 10260 = ', num_review_words[10260])
-
-    review_tuples = make_review_tuples(path)
+    if load.upper() == 'N':
+        print('N')
+        review_tuples = make_review_tuples(path)
+    else:
+        with open('Datasets/tuple_data.pkl', 'rb') as f:
+            review_tuples = pickle.load(f)
+        f.close()
     output = find_nearest_neighbor(query_points, review_tuples)
     print(output)
 
