@@ -3,6 +3,7 @@ import gzip
 import Review
 import Query
 import pickle
+from operator import itemgetter
 
 
 def parse(path):
@@ -32,6 +33,62 @@ def calculate_distance_list(tuples):
             distances.append(t_to_add)
     return distances
 
+#  replace_largest_val(l)
+#  TODO: Comment this
+
+
+def replace_largest_val(lis, new_i, distance):
+    m_val = max(lis, key=itemgetter(1))
+    print(m_val[1])
+    if distance < m_val[1]:
+        print('Replacing ', m_val, ' with ', new_i, ', ', distance)
+        lis[lis.index(m_val)] = (new_i, distance)
+    return lis
+
+#  get_neighbor_vals(neighbors)
+#  TODO: Comment this
+
+
+def get_neighbor_vals(neighbors, tuples):
+    vals = []
+    for n in neighbors:
+        vals.append(tuples[n[0]][1])
+    return vals
+
+#  get_most_occurring(vals)
+#  TODO: Comment this
+
+
+def get_most_occurring(vals):
+    num1 = 0
+    num2 = 0
+    num3 = 0
+    num4 = 0
+    num5 = 0
+
+    for val in vals:
+        if val == 1:
+            num1 += 1
+        elif val == 2:
+            num2 += 1
+        elif val == 3:
+            num3 += 1
+        elif val == 4:
+            num4 += 1
+        else:
+            num5 += 1
+    most_occ = sorted([num1, num2, num3, num4, num5])[4]
+    if most_occ == num1:
+        return 1
+    elif most_occ == num2:
+        return 2
+    elif most_occ == num3:
+        return 3
+    elif most_occ == num4:
+        return 4
+    else:
+        return 5
+
 
 #  calculate_2way_distance(t1, t2)
 #  INPUTS: tuple t1- a tuple of data points
@@ -60,18 +117,18 @@ def calculate_2way_distance(t1, t2):
 #  FUNCTION STATUS: NEEDS REVIEW
 
 
-def find_nearest_neighbor(query, tuples):
+def find_nearest_neighbors(query, tuples, n):
     shortest_distance = 99999999
-    closest_tuple = tuples[0]
-    saved_index = 0
-    for i in range(0, len(tuples)):
-        curr_distance = calculate_2way_distance(query, tuples[i][0])
-        print('', query, ' ', tuples[i], ' distance = ', curr_distance)
-        if curr_distance <= shortest_distance:
-            shortest_distance = curr_distance
-            closest_tuple = tuples[i]
-            saved_index = i
-    return query, closest_tuple, shortest_distance, tuples[saved_index][1]
+
+    nearest_neighbors = []
+    for i in range(0, n):
+        nearest_neighbors.append((-1, shortest_distance))
+
+    for h in range(0, len(tuples)):
+        curr_distance = calculate_2way_distance(query, tuples[h][0])
+        nearest_neighbors = replace_largest_val(nearest_neighbors, h, curr_distance)
+
+    return nearest_neighbors
 
 #  define_base_review_tuples()
 #  INPUTS: path - the relative path to the dataset
@@ -163,8 +220,12 @@ def main():
         with open('Datasets/tuple_data.pkl', 'rb') as f:
             review_tuples = pickle.load(f)
         f.close()
-    output = find_nearest_neighbor(query_points, review_tuples)
+    output = find_nearest_neighbors(query_points, review_tuples, 101)
     print(output)
+    vals = get_neighbor_vals(output, review_tuples)
+    print(vals)
+    most_occ = get_most_occurring(vals)
+    print(most_occ)
 
 
 main()
