@@ -7,7 +7,7 @@ class Review:
         self.overall = overall
         self.review_time = review_time
         self.net_pos_weight = 1000
-        self.help_weight = 100
+        self.help_weight = 50
         self.help_votes_weight = 20
         self.spec_char_weight = 50
         self.pos_words_weight = 30

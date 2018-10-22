@@ -39,9 +39,9 @@ def calculate_distance_list(tuples):
 
 def replace_largest_val(lis, new_i, distance):
     m_val = max(lis, key=itemgetter(1))
-    print(m_val[1])
+    # print(m_val[1])
     if distance < m_val[1]:
-        print('Replacing ', m_val, ' with ', new_i, ', ', distance)
+        # print('Replacing ', m_val, ' with ', new_i, ', ', distance)
         lis[lis.index(m_val)] = (new_i, distance)
     return lis
 
@@ -59,7 +59,19 @@ def get_neighbor_vals(neighbors, tuples):
 #  TODO: Comment this
 
 
-def get_most_occurring(vals):
+def get_most_occurring(vals, tots):
+    w1 = 1 / (tots[1] / tots[0])
+    w2 = 1 / (tots[2] / tots[0])
+    w3 = 1 / (tots[3] / tots[0])
+    w4 = 1 / (tots[4] / tots[0])
+    w5 = 1 / (tots[5] / tots[0])
+
+    print('W1 = ', w1)
+    print('W2 = ', w2)
+    print('W3 = ', w3)
+    print('W4 = ', w4)
+    print('W5 = ', w5)
+
     num1 = 0
     num2 = 0
     num3 = 0
@@ -77,6 +89,12 @@ def get_most_occurring(vals):
             num4 += 1
         else:
             num5 += 1
+    num1 *= w1
+    num2 *= w2
+    num3 *= w3
+    num4 *= w4
+    num5 *= w5
+    print('num1 = ', num1, '\nnum2 = ', num2, '\nnum3 = ', num3, '\nnum4 = ', num4, '\nnum5 = ', num5)
     most_occ = sorted([num1, num2, num3, num4, num5])[4]
     if most_occ == num1:
         return 1
@@ -144,10 +162,11 @@ def define_base_review_tuples(path):
     for review in parse(path):
         review_tuples.append((review['overall'], review['reviewText'], review['helpful']))
         count += 1
-    print(sum(review_tuples[i][0] for i in range(0, count)) / len(review_tuples))
-    print('Review at index 1 = ', review_tuples[1][1])
-    print('\tHelpfulness: ', review_tuples[1][2])
-    print('Count: ', count)
+    # print(total_stars/len(review_tuples))
+    # print(sum(review_tuples[i][0] for i in range(0, count)) / len(review_tuples))
+    # print('Review at index 1 = ', review_tuples[1][1])
+    # print('\tHelpfulness: ', review_tuples[1][2])
+    # print('Count: ', count)
     return review_tuples
 
 #  make_review_list()
@@ -174,7 +193,7 @@ def make_review_tuples(path):
     reviews = make_review_list(path)
     review_tuples = []
     for index, curr in enumerate(reviews):
-        print('Making tuple ', index)
+        # print('Making tuple ', index)
         t1 = curr.get_points()
         t2 = curr.get_overall()
         t3 = (t1, t2)
@@ -200,6 +219,22 @@ def count_review_words(base_tuples):
     return num_review_words
 
 
+def make_test_tuples():
+    test_tuples = [((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
+                   ((0, 0, 0, 0, 0, 0, 0, 0), 3)]
+    return test_tuples
+
+
 def main():
     text = input('Enter a text review: ')
     help1 = int(input('Enter help1'))
@@ -213,6 +248,7 @@ def main():
     # review_tuples = define_base_review_tuples(path)
     # num_review_words = count_review_words(review_tuples)
     # print('WORD COUNT OF INDEX 10260 = ', num_review_words[10260])
+    n = 101
     if load.upper() == 'N':
         print('N')
         review_tuples = make_review_tuples(path)
@@ -220,12 +256,39 @@ def main():
         with open('Datasets/tuple_data.pkl', 'rb') as f:
             review_tuples = pickle.load(f)
         f.close()
-    output = find_nearest_neighbors(query_points, review_tuples, 101)
+    output = find_nearest_neighbors(query_points, review_tuples, n)
     print(output)
     vals = get_neighbor_vals(output, review_tuples)
     print(vals)
-    most_occ = get_most_occurring(vals)
+
+    total_stars = 0
+    count = 0
+    num1 = 0
+    num2 = 0
+    num3 = 0
+    num4 = 0
+    num5 = 0
+    for review in parse(path):
+        curr_stars = review['overall']
+        total_stars += curr_stars
+        if curr_stars == 1:
+            num1 += 1
+        elif curr_stars == 2:
+            num2 += 1
+        elif curr_stars == 3:
+            num3 += 1
+        elif curr_stars == 4:
+            num4 += 1
+        elif curr_stars == 5:
+            num5 += 1
+        count += 1
+    tots = (count, num1, num2, num3, num4, num5)
+
+    most_occ = get_most_occurring(vals, tots)
     print(most_occ)
+
+    print('TOTS: ', tots)
+    print('AVG Stars: ', total_stars/count)
 
 
 main()
