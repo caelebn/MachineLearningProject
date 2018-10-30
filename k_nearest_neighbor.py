@@ -60,11 +60,11 @@ def get_neighbor_vals(neighbors, tuples):
 
 
 def get_most_occurring(vals, tots):
-    w1 = 1 / (tots[1] / tots[0])
-    w2 = 1 / (tots[2] / tots[0])
-    w3 = 1 / (tots[3] / tots[0])
-    w4 = 1 / (tots[4] / tots[0])
-    w5 = 1 / (tots[5] / tots[0])
+    w1 = (1 / (tots[1] / tots[0]))
+    w2 = (1 / (tots[2] / tots[0]))
+    w3 = (1 / (tots[3] / tots[0]))
+    w4 = (1 / (tots[4] / tots[0]))
+    w5 = (1 / (tots[5] / tots[0]))
 
     print('W1 = ', w1)
     print('W2 = ', w2)
@@ -179,7 +179,7 @@ def make_review_list(path):
     reviews = []
     for curr in parse(path):
         # print('Making review of: ', index)
-        review = Review.Review(curr['helpful'], curr['reviewText'], curr['overall'], curr['reviewTime'])
+        review = Query.Review(curr['helpful'], curr['reviewText'], curr['overall'])
         reviews.append(review)
     return reviews
 
@@ -239,11 +239,11 @@ def main():
     text = input('Enter a text review: ')
     help1 = int(input('Enter help1'))
     help2 = int(input('Enter help2'))
-    time = input('Enter date: ')
     load = str(input('Load data? (Y/N)'))
 
-    query = Query.Query([help1, help2], text, time)
+    query = Query.Query([help1, help2], text)
     query_points = query.get_points()
+    print('Query Points: ', query_points)
     path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
     # review_tuples = define_base_review_tuples(path)
     # num_review_words = count_review_words(review_tuples)
