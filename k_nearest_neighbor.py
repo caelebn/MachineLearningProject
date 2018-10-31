@@ -66,11 +66,11 @@ def get_most_occurring(vals, tots):
     w4 = (1 / (tots[4] / tots[0]))
     w5 = (1 / (tots[5] / tots[0]))
 
-    print('W1 = ', w1)
-    print('W2 = ', w2)
-    print('W3 = ', w3)
-    print('W4 = ', w4)
-    print('W5 = ', w5)
+    # print('W1 = ', w1)
+    # print('W2 = ', w2)
+    # print('W3 = ', w3)
+    # print('W4 = ', w4)
+    # print('W5 = ', w5)
 
     num1 = 0
     num2 = 0
@@ -89,12 +89,12 @@ def get_most_occurring(vals, tots):
             num4 += 1
         else:
             num5 += 1
-    num1 *= w1
-    num2 *= w2
-    num3 *= w3
-    num4 *= w4
-    num5 *= w5
-    print('num1 = ', num1, '\nnum2 = ', num2, '\nnum3 = ', num3, '\nnum4 = ', num4, '\nnum5 = ', num5)
+    # num1 *= w1
+    # num2 *= w2
+    # num3 *= w3
+    # num4 *= w4
+    # num5 *= w5
+    # print('num1 = ', num1, '\nnum2 = ', num2, '\nnum3 = ', num3, '\nnum4 = ', num4, '\nnum5 = ', num5)
     most_occ = sorted([num1, num2, num3, num4, num5])[4]
     if most_occ == num1:
         return 1
@@ -235,16 +235,16 @@ def make_test_tuples():
     return test_tuples
 
 
-def main():
-    text = input('Enter a text review: ')
-    help1 = int(input('Enter help1'))
-    help2 = int(input('Enter help2'))
-    load = str(input('Load data? (Y/N)'))
+def main(text, help1, help2, load):
+    # text = input('Enter a text review: ')
+    # help1 = int(input('Enter help1'))
+    # help2 = int(input('Enter help2'))
+    # load = str(input('Load data? (Y/N)'))
 
     query = Query.Query([help1, help2], text)
     query_points = query.get_points()
-    print('Query Points: ', query_points)
-    path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+    # print('Query Points: ', query_points)
+    path = 'Datasets/reviews_Automotive_5.json.gz'
     # review_tuples = define_base_review_tuples(path)
     # num_review_words = count_review_words(review_tuples)
     # print('WORD COUNT OF INDEX 10260 = ', num_review_words[10260])
@@ -257,9 +257,9 @@ def main():
             review_tuples = pickle.load(f)
         f.close()
     output = find_nearest_neighbors(query_points, review_tuples, n)
-    print(output)
+    # print(output)
     vals = get_neighbor_vals(output, review_tuples)
-    print(vals)
+    # print(vals)
 
     total_stars = 0
     count = 0
@@ -285,10 +285,9 @@ def main():
     tots = (count, num1, num2, num3, num4, num5)
 
     most_occ = get_most_occurring(vals, tots)
-    print(most_occ)
+    # print(most_occ)
 
-    print('TOTS: ', tots)
-    print('AVG Stars: ', total_stars/count)
+    # print('TOTS: ', tots)
+    # print('AVG Stars: ', total_stars/count)
+    return most_occ
 
-
-main()
