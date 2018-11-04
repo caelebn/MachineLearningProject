@@ -18,7 +18,7 @@ def get_query_list(path):
 
 
 def main():
-    path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Musical_Instruments_5.json.gz'
     queries = get_query_list(path)
     off = 0
     count = 0

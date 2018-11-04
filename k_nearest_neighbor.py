@@ -1,8 +1,8 @@
 import math
 import gzip
-import Review
 import Query
 import pickle
+import os.path
 from operator import itemgetter
 
 
@@ -45,67 +45,15 @@ def replace_largest_val(lis, new_i, distance):
         lis[lis.index(m_val)] = (new_i, distance)
     return lis
 
-#  get_neighbor_vals(neighbors)
-#  TODO: Comment this
-
-
-def get_neighbor_vals(neighbors, tuples):
-    vals = []
-    for n in neighbors:
-        vals.append(tuples[n[0]][1])
-    return vals
-
 #  get_most_occurring(vals)
 #  TODO: Comment this
 
 
-def get_most_occurring(vals, tots):
-    w1 = (1 / (tots[1] / tots[0]))
-    w2 = (1 / (tots[2] / tots[0]))
-    w3 = (1 / (tots[3] / tots[0]))
-    w4 = (1 / (tots[4] / tots[0]))
-    w5 = (1 / (tots[5] / tots[0]))
-
-    # print('W1 = ', w1)
-    # print('W2 = ', w2)
-    # print('W3 = ', w3)
-    # print('W4 = ', w4)
-    # print('W5 = ', w5)
-
-    num1 = 0
-    num2 = 0
-    num3 = 0
-    num4 = 0
-    num5 = 0
-
+def get_most_occurring(vals):
+    starCount = [0] * 5
     for val in vals:
-        if val == 1:
-            num1 += 1
-        elif val == 2:
-            num2 += 1
-        elif val == 3:
-            num3 += 1
-        elif val == 4:
-            num4 += 1
-        else:
-            num5 += 1
-    # num1 *= w1
-    # num2 *= w2
-    # num3 *= w3
-    # num4 *= w4
-    # num5 *= w5
-    # print('num1 = ', num1, '\nnum2 = ', num2, '\nnum3 = ', num3, '\nnum4 = ', num4, '\nnum5 = ', num5)
-    most_occ = sorted([num1, num2, num3, num4, num5])[4]
-    if most_occ == num1:
-        return 1
-    elif most_occ == num2:
-        return 2
-    elif most_occ == num3:
-        return 3
-    elif most_occ == num4:
-        return 4
-    else:
-        return 5
+        starCount[int(val[1])] += 1
+    return starCount.index(max(starCount)) + 1
 
 
 #  calculate_2way_distance(t1, t2)
@@ -128,6 +76,8 @@ def calculate_2way_distance(t1, t2):
 #  find_nearest_neighbor(query, tuples)
 #  INPUTS: query- the tuple to be compared to the list of tuples.
 #          tuples- the pre-existing list of tuples that will be compared against.
+#           max - the highest number allowed to calculate to make the number of reviews
+#                the same for each overall
 #  OUTPUTS: tuple(query, nearest_neighbor, distance, tuples[i][1])- a tuple containing the original query and its
 #               nearest neighbor, along with the distance between them, and the overall of the knn tuple
 #  INFO: Goes through the tuples list and compares the distance to the query, saving off the shortest distance and
@@ -135,39 +85,24 @@ def calculate_2way_distance(t1, t2):
 #  FUNCTION STATUS: NEEDS REVIEW
 
 
-def find_nearest_neighbors(query, tuples, n):
-    shortest_distance = 99999999
+def find_nearest_neighbors(query, points_list, k):
+    distances = []
+    for i in range(5):
+        for j in range(get_max_overall_allowed(points_list)):
+            distances.append((calculate_2way_distance(query, points_list[i][j]), i))
+    distances.sort(key=lambda l:l[0])
+    return distances[0:k]    
 
-    nearest_neighbors = []
-    for i in range(0, n):
-        nearest_neighbors.append((-1, shortest_distance))
+#get_max_overall_allowed
+#finds which overall number has the lowest amount of reviews, and
+#returns the number of reviews with that overall
 
-    for h in range(0, len(tuples)):
-        curr_distance = calculate_2way_distance(query, tuples[h][0])
-        nearest_neighbors = replace_largest_val(nearest_neighbors, h, curr_distance)
-
-    return nearest_neighbors
-
-#  define_base_review_tuples()
-#  INPUTS: path - the relative path to the dataset
-#  OUTPUTS: review_tuples- a list of all base review tuples
-#  INFO: goes through the dataset and puts all data into a list of tuples
-#        including final stars given (overall), review text (reviewText), and helpfulness (helpful)
-#  FUNCTION STATUS: INCOMPLETE
-
-
-def define_base_review_tuples(path):
-    review_tuples = []
-    count = 0
-    for review in parse(path):
-        review_tuples.append((review['overall'], review['reviewText'], review['helpful']))
-        count += 1
-    # print(total_stars/len(review_tuples))
-    # print(sum(review_tuples[i][0] for i in range(0, count)) / len(review_tuples))
-    # print('Review at index 1 = ', review_tuples[1][1])
-    # print('\tHelpfulness: ', review_tuples[1][2])
-    # print('Count: ', count)
-    return review_tuples
+def get_max_overall_allowed(points_list):
+    star_count = [0]*5
+    for i in range(5):
+        star_count[i] = len(points_list[i])
+    smallest_number = min(star_count, key=int)
+    return smallest_number
 
 #  make_review_list()
 #  INPUTS: path- the path to the dataset
@@ -177,32 +112,31 @@ def define_base_review_tuples(path):
 
 def make_review_list(path):
     reviews = []
+    for i in range(5):
+        reviews.append([])
+
     for curr in parse(path):
-        # print('Making review of: ', index)
         review = Query.Review(curr['helpful'], curr['reviewText'], curr['overall'])
-        reviews.append(review)
+        reviews[int(review.get_overall()-1)].append(review)
     return reviews
 
-#  make_review_tuples()
+#  make_review_points_list()
 #  INPUTS: path- path to dataset
 #  OUTPUTS: tuples_list - a list of tuples of the data points from the reviews list.
 #           format = ((d1, d2, ... , dn), overall)
 
 
-def make_review_tuples(path):
+def make_review_points_list(path):
     reviews = make_review_list(path)
-    review_tuples = []
-    for index, curr in enumerate(reviews):
-        # print('Making tuple ', index)
-        t1 = curr.get_points()
-        t2 = curr.get_overall()
-        t3 = (t1, t2)
-        # print('Making review tuple of: ', index)
-        review_tuples.append(t3)
+    review_points_list = []
+    for i in range(5):
+        review_points_list.append([])
+        for index, curr in enumerate(reviews[i]):
+            review_points_list[i].append(curr.get_points())
     with open('Datasets/tuple_data.pkl', 'wb') as f:
-        pickle.dump(review_tuples, f)
+        pickle.dump(review_points_list, f)
     f.close()
-    return review_tuples
+    return review_points_list
 
 #  count_review_words(base_tuples)
 #  INPUTS: base_tuples - the list of base review tuples
@@ -235,59 +169,33 @@ def make_test_tuples():
     return test_tuples
 
 
-def main(text, help1, help2, load):
-    # text = input('Enter a text review: ')
-    # help1 = int(input('Enter help1'))
-    # help2 = int(input('Enter help2'))
-    # load = str(input('Load data? (Y/N)'))
-
+def main_helper(text, help1, help2, load):
     query = Query.Query([help1, help2], text)
     query_points = query.get_points()
-    # print('Query Points: ', query_points)
-    path = 'Datasets/reviews_Automotive_5.json.gz'
-    # review_tuples = define_base_review_tuples(path)
-    # num_review_words = count_review_words(review_tuples)
-    # print('WORD COUNT OF INDEX 10260 = ', num_review_words[10260])
+    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz'
     n = 101
-    if load.upper() == 'N':
+    if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
         print('N')
-        review_tuples = make_review_tuples(path)
+        review_points_list = make_review_points_list(path)
     else:
         with open('Datasets/tuple_data.pkl', 'rb') as f:
-            review_tuples = pickle.load(f)
+            review_points_list = pickle.load(f)
         f.close()
-    output = find_nearest_neighbors(query_points, review_tuples, n)
-    # print(output)
-    vals = get_neighbor_vals(output, review_tuples)
-    # print(vals)
+    output = find_nearest_neighbors(query_points, review_points_list, n)
+    print(output)
+    print(get_most_occurring(output))
 
-    total_stars = 0
-    count = 0
-    num1 = 0
-    num2 = 0
-    num3 = 0
-    num4 = 0
-    num5 = 0
-    for review in parse(path):
-        curr_stars = review['overall']
-        total_stars += curr_stars
-        if curr_stars == 1:
-            num1 += 1
-        elif curr_stars == 2:
-            num2 += 1
-        elif curr_stars == 3:
-            num3 += 1
-        elif curr_stars == 4:
-            num4 += 1
-        elif curr_stars == 5:
-            num5 += 1
-        count += 1
-    tots = (count, num1, num2, num3, num4, num5)
+def main():
+    text = input('Enter a text review: ')
+    try:
+        helpful = int(input('Enter helpful count: '))
+    except:
+        helpful = 0
+    try:
+        not_helpful = int(input('Enter not helpful count: '))
+    except:
+        not_helpful = 0
+    load = str(input('Use existing review tuples? (Y/N) '))
+    main_helper(text, helpful, not_helpful, load)
 
-    most_occ = get_most_occurring(vals, tots)
-    # print(most_occ)
-
-    # print('TOTS: ', tots)
-    # print('AVG Stars: ', total_stars/count)
-    return most_occ
-
+main()
