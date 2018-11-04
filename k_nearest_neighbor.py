@@ -116,7 +116,7 @@ def make_review_list(path):
         reviews.append([])
 
     for curr in parse(path):
-        review = Query.Review(curr['helpful'], curr['reviewText'], curr['overall'])
+        review = Query.Review(curr['reviewText'], curr['overall'])
         reviews[int(review.get_overall()-1)].append(review)
     return reviews
 
@@ -169,10 +169,11 @@ def make_test_tuples():
     return test_tuples
 
 
-def main_helper(text, help1, help2, load):
-    query = Query.Query([help1, help2], text)
+def main_helper(text, load):
+    query = Query.Query(text)
     query_points = query.get_points()
-    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz'
+    #path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Toys_and_Games_5.json.gz' #786/2000 1.23
+    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz' #718/2000 1.36
     n = 101
     if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
         print('N')
@@ -188,15 +189,7 @@ def main_helper(text, help1, help2, load):
 
 def main():
     text = input('Enter a text review: ')
-    try:
-        helpful = int(input('Enter helpful count: '))
-    except:
-        helpful = 0
-    try:
-        not_helpful = int(input('Enter not helpful count: '))
-    except:
-        not_helpful = 0
     load = str(input('Use existing review tuples? (Y/N) '))
-    main_helper(text, helpful, not_helpful, load)
+    print(main_helper(text, load))
 
 #main()
