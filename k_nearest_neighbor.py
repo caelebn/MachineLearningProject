@@ -182,8 +182,9 @@ def main_helper(text, help1, help2, load):
             review_points_list = pickle.load(f)
         f.close()
     output = find_nearest_neighbors(query_points, review_points_list, n)
-    print(output)
-    print(get_most_occurring(output))
+    #print(output)
+    #print(get_most_occurring(output))
+    return get_most_occurring(output)
 
 def main():
     text = input('Enter a text review: ')
@@ -198,4 +199,4 @@ def main():
     load = str(input('Use existing review tuples? (Y/N) '))
     main_helper(text, helpful, not_helpful, load)
 
-main()
+#main()

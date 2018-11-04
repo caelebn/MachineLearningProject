@@ -27,8 +27,8 @@ def main():
     num_2_off = 0
     num_3_off = 0
     num_4_off = 0
-    for i in range(0, 200):
-        knn_val = k_nearest_neighbor.main(queries[i][0], 0, 0, 'Y')
+    for i in range(0, 2000):
+        knn_val = k_nearest_neighbor.main_helper(queries[i][0], 0, 0, 'Y')
         curr_off = abs(queries[i][1] - knn_val)  # actual - estimate
         if curr_off == 0:
             num_correct += 1
