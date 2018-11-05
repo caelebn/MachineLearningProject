@@ -1,6 +1,16 @@
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer 
 
+#0: net_negative_weight  # from 0 to 1
+#1: net_neutral_weight    # from 0 to 1
+#2: net_compound_weight   # from 0 to 1
+#3: net_positive_weight  # from 0 to 1
+#4: uppercase_weight # from 0 to 1
+#5: spec_char_weight
+#6: sentence_length_weight # from 0 to 6
+#7: richness_weight #experimental
+weights = [315, 145, 135, 315, 185, 117, 135, 165]
+
 class Query:
     positive_words = []
     negative_words = []
@@ -9,14 +19,6 @@ class Query:
     #  Initializer
     def __init__(self, text):
         self.text = text
-        self.net_negative_weight = 200  # from 0 to 1
-        self.net_neutral_weight = 30    # from 0 to 1
-        self.net_compound_weight = 20   # from 0 to 1
-        self.net_positive_weight = 200  # from 0 to 1
-        self.uppercase_weight = 70 # from 0 to 1
-        self.spec_char_weight = 2
-        self.sentence_length_weight = 20 # from 0 to 6
-        self.richness_weight = 50 #experimental
         self.find_polarity_scores()
 
     def find_polarity_scores(self):
@@ -99,23 +101,15 @@ class Query:
         length = max(1, len(self.text))
         return len(set(self.text)) / length
 
-    @staticmethod
-    def get_emphasis_words():
-        if len(Query.emphasis_words) == 0:
-            with open('Datasets/negative_words.txt', 'r') as emp_file:
-                Query.emphasis_words = emp_file.read().upper().splitlines()
-            emp_file.close()
-        return Query.emphasis_words
-
     def get_points(self):
-        return (self.percent_uppercase() * self.uppercase_weight,
-                self.num_special_chars() * self.spec_char_weight,
-                self.get_net_negativity() * self.net_negative_weight,
-                self.get_net_neutrality() * self.net_neutral_weight,
-                self.get_net_compound() * self.net_compound_weight,
-                self.get_net_positivity() * self.net_positive_weight,
-                self.get_average_sentence_length() * self.sentence_length_weight,
-                self.get_richness() * self.richness_weight)
+        return (self.percent_uppercase() * weights[4],
+                self.num_special_chars() * weights[5],
+                self.get_net_negativity() * weights[0],
+                self.get_net_neutrality() * weights[1],
+                self.get_net_compound() * weights[2],
+                self.get_net_positivity() * weights[3],
+                self.get_average_sentence_length() * weights[6],
+                self.get_richness() * weights[7])
 
 
 class Review(Query):

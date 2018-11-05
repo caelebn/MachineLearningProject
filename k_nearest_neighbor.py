@@ -172,9 +172,9 @@ def make_test_tuples():
 def main_helper(text, load):
     query = Query.Query(text)
     query_points = query.get_points()
-    #path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Toys_and_Games_5.json.gz' #786/2000 1.23
-    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz' #718/2000 1.36
-    n = 101
+    #path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Toys_and_Games_5.json.gz' #37% 1.1 (not sure why it's lower
+    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz' #41% 1.01 offset with 500
+    n = 101 #101
     if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
         print('N')
         review_points_list = make_review_points_list(path)
