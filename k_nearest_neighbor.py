@@ -28,25 +28,13 @@ def calculate_distance_list(tuples):
     distances = []
     for i in range(0, len(tuples)-1):
         for j in range(i+1, len(tuples)):
-            dist = calculate_2way_distance(tuples[i], tuples[j])
+            dist = calculate_manhattan_distance(tuples[i], tuples[j])
             t_to_add = (tuples[i], tuples[j], dist)
             distances.append(t_to_add)
     return distances
 
-#  replace_largest_val(l)
-#  TODO: Comment this
-
-
-def replace_largest_val(lis, new_i, distance):
-    m_val = max(lis, key=itemgetter(1))
-    # print(m_val[1])
-    if distance < m_val[1]:
-        # print('Replacing ', m_val, ' with ', new_i, ', ', distance)
-        lis[lis.index(m_val)] = (new_i, distance)
-    return lis
-
 #  get_most_occurring(vals)
-#  TODO: Comment this
+#  Finds the overall rating that occurs most out of the nearest neighbors
 
 
 def get_most_occurring(vals):
@@ -65,13 +53,10 @@ def get_most_occurring(vals):
 #  FUNCTION STATUS: WORKING AS INTENDED
 
 
-def calculate_2way_distance(t1, t2):
-    sum_total = 0
-    for index in range(0, len(t1)):
-        difference = t1[index] - t2[index]
-        two_point_diffsq = difference * difference
-        sum_total += two_point_diffsq
-    return math.sqrt(sum_total)
+def calculate_manhattan_distance(t1, t2):
+    for i in range(len(t1)):
+        sum_total = t1[i] - t2[i]
+    return sum_total
 
 #  find_nearest_neighbor(query, tuples)
 #  INPUTS: query- the tuple to be compared to the list of tuples.
@@ -89,7 +74,7 @@ def find_nearest_neighbors(query, points_list, k):
     distances = []
     for i in range(5):
         for j in range(get_max_overall_allowed(points_list)):
-            distances.append((calculate_2way_distance(query, points_list[i][j]), i))
+            distances.append((calculate_manhattan_distance(query, points_list[i][j]), i))
     distances.sort(key=lambda l:l[0])
     return distances[0:k]    
 
@@ -138,45 +123,13 @@ def make_review_points_list(path):
     f.close()
     return review_points_list
 
-#  count_review_words(base_tuples)
-#  INPUTS: base_tuples - the list of base review tuples
-#  OUTPUTS: num_review_words - a list of the number of review words for each review.
-#  INFO: parses through the base_tuples and counts the number of words in each review, storing the result
-#        in a separate list.
-#  FUNCTION STATUS: INCOMPLETE
-
-
-def count_review_words(base_tuples):
-    num_review_words = []
-    for curr_tuple in base_tuples:
-        num_review_words.append(len(curr_tuple[1].split()))
-    return num_review_words
-
-
-def make_test_tuples():
-    test_tuples = [((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3),
-                   ((0, 0, 0, 0, 0, 0, 0, 0), 3)]
-    return test_tuples
-
-
-def main_helper(text, load):
+def main_helper(text, make_reviews = False):
     query = Query.Query(text)
     query_points = query.get_points()
     #path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Toys_and_Games_5.json.gz' #37% 1.1 (not sure why it's lower
     path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz' #41% 1.01 offset with 500
     n = 101 #101
-    if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
-        print('N')
+    if make_reviews:
         review_points_list = make_review_points_list(path)
     else:
         with open('Datasets/tuple_data.pkl', 'rb') as f:
@@ -190,6 +143,10 @@ def main_helper(text, load):
 def main():
     text = input('Enter a text review: ')
     load = str(input('Use existing review tuples? (Y/N) '))
-    print(main_helper(text, load))
+    if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
+        make_reviews = True
+    else:
+        make_reviews = False
+    print(main_helper(text, make_reviews))
 
 #main()

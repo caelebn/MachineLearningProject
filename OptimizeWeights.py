@@ -3,7 +3,6 @@ import Query
 import gzip
 import pickle
 
-
 def parse(path):
     g = gzip.open(path, 'r')
     for l in g:
@@ -38,7 +37,7 @@ def main():
     path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Books_5.json.gz'
     num_tests = 5
     max_iterations = 25
-    queries = get_query_list(path, num_tests)
+    queries = get_query_list(path, num_tests*max_iterations)
     off = 0
     last_num_correct = 0
     num_off = [0] * 5
@@ -46,7 +45,7 @@ def main():
     last_weights = [0]*len(Query.weights)
     for j in range(max_iterations):
         for i in range(num_tests):
-            knn_val = k_nearest_neighbor.main_helper(queries[i][0], 'Y')
+            knn_val = k_nearest_neighbor.main_helper(queries[count][0])
             curr_off = int(abs(queries[i][1] - knn_val))  # actual - estimate
             num_off[curr_off] += 1
             off += curr_off
