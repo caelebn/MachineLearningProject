@@ -9,7 +9,9 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #5: spec_char_weight
 #6: sentence_length_weight # from 0 to 6
 #7: richness_weight #experimental
-weights = [315, 145, 135, 315, 185, 117, 135, 165]
+#weights = [315, 145, 135, 315, 185, 117, 135, 165]
+weights = [20, 5, 5, 20, 10, 10, 10, 10]
+#weights = [5077, 4907, 4897, 5077, 4947, 4879, 4897, 4927]
 
 class Query:
     positive_words = []

@@ -2,23 +2,7 @@ import KNN
 import Review
 import gzip
 import pickle
-
-def parse(path):
-    g = gzip.open(path, 'r')
-    for l in g:
-        yield eval(l)
-
-
-def get_query_list(path, num_tests):
-    queries = []
-    count = 0
-    for curr in parse(path):
-        q = curr['reviewText'], curr['overall']
-        queries.append(q)
-        count += 1
-        if count >= num_tests:
-            break
-    return queries
+import TestBase
 
 def check_done(curr_weight, last_weight):
     for i in range(len(curr_weight)):
@@ -37,24 +21,26 @@ def main():
     path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Books_5.json.gz'
     num_tests = 5
     max_iterations = 25
-    queries = get_query_list(path, num_tests*max_iterations)
+    queries = TestBase.get_query_list(path, num_tests*max_iterations)
     off = 0
     last_num_correct = 0
     num_off = [0] * 5
     learning_rate = 0.5
     last_weights = [0]*len(Review.weights)
+    max_to_grab = TestBase.find_count(queries)
     for j in range(max_iterations):
-        for i in range(num_tests):
-            knn_val = KNN.main_helper(queries[i][0])
-            curr_off = int(abs(queries[i][1] - knn_val))  # actual - estimate
-            num_off[curr_off] += 1
-            off += curr_off
-            print("i:{} j:{}".format(i, j))
-            if i > 0 and check_done(Review.weights, last_weights):
-                break;
-            mid_step_weights = Review.weights
-            for k in range(len(Review.weights)):
-                Review.weights[k] = Review.weights[k] + learning_rate*(num_off[0] - last_num_correct)*weight_slope(num_off[0], last_num_correct, Review.weights[k], last_weights[k])
+        for l in range(5):
+            for i in range(max_to_grab):
+                knn_val = KNN.guess_review(queries[l][i])
+                curr_off = abs(l+1 - knn_val)  # actual - estimate
+                num_off[curr_off] += 1
+                off += curr_off
+                print("i:{} j:{}".format(i, j))
+                if i > 0 and check_done(Review.weights, last_weights):
+                    break;
+                mid_step_weights = Review.weights
+                for k in range(len(Review.weights)):
+                    Review.weights[k] = Review.weights[k] + learning_rate*(num_off[0] - last_num_correct)*weight_slope(num_off[0], last_num_correct, Review.weights[k], last_weights[k])
         last_num_correct = num_off[0]
         last_weights = mid_step_weights
         print(Review.weights[k])
