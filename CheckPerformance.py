@@ -8,7 +8,6 @@ def main():
     path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Books_5.json.gz'
     num_tests = 2000
     queries = TestBase.get_query_list(path, num_tests)
-    count = 0
     num_off = [0] * 5
     max_to_grab = TestBase.find_count(queries)
     for i in range(5):

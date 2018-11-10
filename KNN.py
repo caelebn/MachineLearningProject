@@ -1,5 +1,6 @@
 import math
 import gzip
+import io
 import Review
 import pickle
 import os.path
@@ -7,17 +8,47 @@ import bisect
 import Selection
 from operator import itemgetter
 
-review_points_list = []
-for i in range(5):
-    review_points_list.append([])
+review_points_list = [[],[],[],[],[]]
 
 n = 101
-path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Patio_Lawn_and_Garden_5.json.gz'
+path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz'
 
 def parse(path):
-    g = gzip.open(path, 'r')
-    for l in g:
+    gz = gzip.open(path, 'rb')
+    f = io.BufferedReader(gz)
+    for l in f:
         yield eval(l)
+    gz.close()
+
+def load_tuple_data():
+    global review_points_list
+    with open('Datasets/tuple_data.pkl', 'rb') as f:
+        review_points_list = pickle.load(f)
+    f.close()
+    if not review_points_list[0]:
+        make_review_points_list()
+
+def dump_tuple_data():
+    with open('Datasets/tuple_data.pkl', 'wb') as f:
+        pickle.dump(review_points_list, f)
+    f.close()
+
+#used exclusively in classes that graph data
+def get_tuple_data():
+    return review_points_list
+
+#  make_review_list()
+#  INPUTS: path- the path to the dataset
+#  OUTPUTS: reviews- a list of Review objects
+#  INFO:  Makes a list of Review objects from the given dataset
+def make_review_list(path):
+    reviews = []
+    for i in range(5):
+        reviews.append([])
+    for curr in parse(path):
+        review = Review.Review(curr['reviewText'], curr['overall'])
+        reviews[review.get_overall()-1].append(review)
+    return reviews
 
 #  get_most_occurring(vals)
 #  Finds the overall rating that occurs most out of the nearest neighbors
@@ -52,7 +83,7 @@ def calculate_manhattan_distance(t1, t2):
 #          k - the number of neighbors to grab
 #  OUTPUTS: a list of tuples, each containing containing the distance and its rating
 #  INFO: Goes through the tuples list and compares the distance to the query
-def find_nearest_neighbors(query, points_list, k):
+def find_nearest_neighbors(query, points_list, k = n):
     distances = []
     for i in range(5):
         for j in range(len(points_list[i])):
@@ -68,19 +99,6 @@ def get_max_overall_allowed(review_list):
         star_count[i] = len(review_list[i])
     return min(star_count, key=int)
 
-#  make_review_list()
-#  INPUTS: path- the path to the dataset
-#  OUTPUTS: reviews- a list of Review objects
-#  INFO:  Makes a list of Review objects from the given dataset
-def make_review_list(path):
-    reviews = []
-    for i in range(5):
-        reviews.append([])
-    for curr in parse(path):
-        review = Review.Review(curr['reviewText'], curr['overall'])
-        reviews[review.get_overall()-1].append(review)
-    return reviews
-
 #  make_review_points_list()
 #  INPUTS: path- path to dataset
 #  OUTPUTS: tuples_list - a list of tuples of the data points from the reviews list.
@@ -94,23 +112,9 @@ def make_review_points_list(location = path):
     dump_tuple_data()
     return review_points_list
 
-def load_tuple_data():
-    global review_points_list
-    with open('Datasets/tuple_data.pkl', 'rb') as f:
-        review_points_list = pickle.load(f)
-    f.close()
-    if len(review_points_list[0]) == 0:
-        make_review_points_list()
-
-def dump_tuple_data():
-    with open('Datasets/tuple_data.pkl', 'wb') as f:
-        pickle.dump(review_points_list, f)
-    f.close()
-
 def guess_review(text):
-    global review_points_list
-    global n
-    if len(review_points_list[0]) == 0:
+    global review_points_list, n
+    if not review_points_list[0]:
         load_tuple_data()
     query = Review.Query(text)
     query_points = query.get_points()

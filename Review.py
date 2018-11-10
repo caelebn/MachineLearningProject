@@ -1,22 +1,12 @@
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer 
 
-#0: net_negative_weight  # from 0 to 1
-#1: net_neutral_weight    # from 0 to 1
-#2: net_compound_weight   # from 0 to 1
-#3: net_positive_weight  # from 0 to 1
-#4: uppercase_weight # from 0 to 1
-#5: spec_char_weight
-#6: sentence_length_weight # from 0 to 6
-#7: richness_weight #experimental
-#weights = [315, 145, 135, 315, 185, 117, 135, 165]
-weights = [20, 5, 5, 20, 10, 10, 10, 10]
-#weights = [5077, 4907, 4897, 5077, 4947, 4879, 4897, 4927]
+#0: net_compound_weight   # from -1 to 1
+#1: uppercase_weight # from 0 to 1
+#2: richness_weight #experimental
+weights = [3, 3, 37]
 
 class Query:
-    positive_words = []
-    negative_words = []
-    emphasis_words = []
 
     #  Initializer
     def __init__(self, text):
@@ -66,18 +56,6 @@ class Query:
                 num_special_chars += 1
         return num_special_chars
 
-    def get_net_negativity(self):
-        return self.polarity_negative
-
-    def get_net_neutrality(self):
-        return self.polarity_neutral
-
-    def get_net_compound(self):
-        return self.polarity_compound
-
-    def get_net_positivity(self):
-        return self.polarity_positive
-
     def get_average_sentence_length(self):
         total_words = 0
         sentences = self.text.split('.')
@@ -104,14 +82,9 @@ class Query:
         return len(set(self.text)) / length
 
     def get_points(self):
-        return (self.percent_uppercase() * weights[4],
-                self.num_special_chars() * weights[5],
-                self.get_net_negativity() * weights[0],
-                self.get_net_neutrality() * weights[1],
-                self.get_net_compound() * weights[2],
-                self.get_net_positivity() * weights[3],
-                self.get_average_sentence_length() * weights[6],
-                self.get_richness() * weights[7])
+        return (self.percent_uppercase() * weights[1],
+                self.polarity_compound * weights[0],
+                self.get_richness() * weights[2])
 
 
 class Review(Query):
