@@ -13,7 +13,7 @@ def get_average_sentence_length(text):
         return total_words / total_sentences
 
 reviews = [[],[],[],[],[]]
-location_base = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\\'
+location_base = 'Datasets/'
 datasets = ['reviews_Automotive_5.json.gz',
             'reviews_Musical_Instruments_5.json.gz',
             'reviews_Patio_Lawn_and_Garden_5.json.gz',

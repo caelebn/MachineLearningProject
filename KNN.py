@@ -11,7 +11,7 @@ from operator import itemgetter
 review_points_list = [[],[],[],[],[]]
 
 n = 101
-path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz'
+path = 'Datasets/reviews_Automotive_5.json.gz'
 
 def parse(path):
     gz = gzip.open(path, 'rb')

@@ -3,16 +3,18 @@ import Review
 import TestBase
 import Selection
 
+
 def get_max_weight(tuple_list):
-    max = (0,0)
+    max = (0, 0)
     for i in range(len(tuple_list)):
         if tuple_list[i][0] > max[0]:
             max = tuple_list[i]
     return max[1]
 
-#attempts to optimize weights, assuming that weights are independent of each other
+
+#  attempts to optimize weights, assuming that weights are independent of each other
 def main():
-    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Books_5.json.gz'
+    path = 'Datasets/reviews_Books_5.json.gz'
     weight_range = (0,150)
     queries = TestBase.get_query_list(path, 5*(weight_range[1] - weight_range[0]))
     max_to_grab = TestBase.find_count(queries)

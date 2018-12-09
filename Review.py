@@ -86,6 +86,11 @@ class Query:
                 self.polarity_compound * weights[0],
                 self.get_richness() * weights[2])
 
+    def get_raw_points(self):
+        return (self.percent_uppercase(),
+                self.polarity_compound,
+                self.get_richness())
+
 
 class Review(Query):
 

@@ -29,7 +29,7 @@ def get_net_positivity(text):
 
 
 reviews = [[],[],[],[],[]]
-location_base = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\\'
+location_base = 'Datasets/'
 datasets = ['reviews_Musical_Instruments_5.json.gz',
             'reviews_Automotive_5.json.gz',
             'reviews_Patio_Lawn_and_Garden_5.json.gz']

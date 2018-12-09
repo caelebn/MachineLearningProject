@@ -2,10 +2,12 @@ import KNN
 import gzip
 import pickle
 import TestBase
+import nltk
+nltk.download('vader_lexicon')
 
 def main():
     #path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Musical_Instruments_5.json.gz'
-    path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Books_5.json.gz'
+    path = 'Datasets/reviews_Amazon_Instant_Video_5.json.gz'
     num_tests = 2000
     queries = TestBase.get_query_list(path, num_tests)
     num_off = [0] * 5
