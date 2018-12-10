@@ -3,15 +3,18 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 #0: net_compound_weight   # from -1 to 1
 #1: uppercase_weight # from 0 to 1
-#2: richness_weight #experimental
-weights = [3, 3, 37]
+#2: helpful weight
+#3: not helpful weight
+weights = [200, 4.9, 10, 10] #37.5%
 
 class Query:
 
     #  Initializer
-    def __init__(self, text):
+    def __init__(self, text, helpful, not_helpful):
         self.text = text
         self.find_polarity_scores()
+        self.helpful = min(10, helpful)
+        self.not_helpful = min(15, not_helpful)
 
     def find_polarity_scores(self):
         sid = SentimentIntensityAnalyzer()
@@ -77,21 +80,24 @@ class Query:
             return 1
         return 0
 
-    def get_richness(self):
-        length = max(1, len(self.text))
-        return len(set(self.text)) / length
+    def get_helpful(self):
+        return self.helpful
+
+    def get_not_helpful(self):
+        return self.not_helpful
 
     def get_points(self):
         return (self.percent_uppercase() * weights[1],
                 self.polarity_compound * weights[0],
-                self.get_richness() * weights[2])
+                self.get_helpful() * weights[2],
+                self.get_not_helpful() * weights[3])
 
 
 class Review(Query):
 
     #  Initializer
-    def __init__(self, text, overall):
-        Query.__init__(self, text)
+    def __init__(self, text, helpful, not_helpful, overall):
+        Query.__init__(self, text, helpful, not_helpful)
         self.overall = int(overall)
 
     def get_overall(self):

@@ -9,9 +9,11 @@ import Selection
 from operator import itemgetter
 
 review_points_list = [[],[],[],[],[]]
+reviews = [[],[],[],[],[]]
 
-n = 101
-path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_Automotive_5.json.gz'
+n = 751 #only if not using sqrt(n)
+set_name = 'Video_Games'
+path = r'C:\Users\mdhal\Desktop\Fall 2018\Machine Learning\Project\Compressed\reviews_' + set_name + '_5.json.gz'
 
 def parse(path):
     gz = gzip.open(path, 'rb')
@@ -22,14 +24,15 @@ def parse(path):
 
 def load_tuple_data():
     global review_points_list
-    with open('Datasets/tuple_data.pkl', 'rb') as f:
+    with open('Datasets/' + set_name + '_tuple_data.pkl', 'rb') as f:
         review_points_list = pickle.load(f)
     f.close()
     if not review_points_list[0]:
         make_review_points_list()
 
 def dump_tuple_data():
-    with open('Datasets/tuple_data.pkl', 'wb') as f:
+    global set_name
+    with open('Datasets/' + set_name + '_tuple_data.pkl', 'wb') as f:
         pickle.dump(review_points_list, f)
     f.close()
 
@@ -41,14 +44,11 @@ def get_tuple_data():
 #  INPUTS: path- the path to the dataset
 #  OUTPUTS: reviews- a list of Review objects
 #  INFO:  Makes a list of Review objects from the given dataset
-def make_review_list(path):
-    reviews = []
-    for i in range(5):
-        reviews.append([])
-    for curr in parse(path):
-        review = Review.Review(curr['reviewText'], curr['overall'])
+def make_review_list(location = path):
+    global reviews
+    for curr in parse(location):
+        review = Review.Review(curr['reviewText'], curr['helpful'][0], curr['helpful'][1], curr['overall'])
         reviews[review.get_overall()-1].append(review)
-    return reviews
 
 #  get_most_occurring(vals)
 #  Finds the overall rating that occurs most out of the nearest neighbors
@@ -94,38 +94,58 @@ def find_nearest_neighbors(query, points_list, k = n):
 #finds which overall number has the lowest amount of reviews, and
 #returns the number of reviews with that overall
 def get_max_overall_allowed(review_list):
-    star_count = [0]*5
-    for i in range(5):
-        star_count[i] = len(review_list[i])
-    return min(star_count, key=int)
+    return min(len(x) for x in review_list)
 
 #  make_review_points_list()
 #  INPUTS: path- path to dataset
 #  OUTPUTS: tuples_list - a list of tuples of the data points from the reviews list.
 #           format = ((d1, d2, ... , dn), overall)
 def make_review_points_list(location = path):
+    global review_points_list, reviews
     print("Creating all review points. This may take a while")
-    reviews = make_review_list(location)
+    make_review_list(location)
+    max_allowed = get_max_overall_allowed(reviews)
+    for i in range(5):
+        for j in range(max_allowed):
+            review_points_list[i].append(reviews[i][j].get_points())
+    dump_tuple_data()
+
+#  make_review_points_list()
+#  INPUTS: path- path to dataset
+#  OUTPUTS: tuples_list - a list of tuples of the data points from the reviews list.
+#           format = ((d1, d2, ... , dn), overall)
+def update_review_points_list():
+    global review_points_list, reviews
     for i in range(5):
         for j in range(get_max_overall_allowed(reviews)):
             review_points_list[i].append(reviews[i][j].get_points())
     dump_tuple_data()
-    return review_points_list
 
-def guess_review(text):
+def set_review_points_list(list):
+    global review_points_list
+    review_points_list = list
+
+def guess_review(query):
     global review_points_list, n
     if not review_points_list[0]:
         load_tuple_data()
-    query = Review.Query(text)
+    query = Review.Query(query[0], query[1], query[2])
     query_points = query.get_points()
     output = find_nearest_neighbors(query_points, review_points_list, n)
     return get_most_occurring(output)
 
-def main():
+def guess_tuple(tuple):
+    global review_points_list, n
+    if not review_points_list[0]:
+        load_tuple_data()
+    output = find_nearest_neighbors(tuple, review_points_list, n)
+    return get_most_occurring(output)
+
+if(__name__ == '__main__'):
     text = input('Enter a text review: ')
+    helpful = int(input('Enter helpful: '))
+    not_helpful = int(input('Enter not helpful: '))
     load = str(input('Use existing review tuples? (Y/N) '))
     if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_data.pkl'):
         make_review_points_list()
-    print(guess_review(text))
-
-#main()
+    print(guess_review((text, helpful, not_helpful)))

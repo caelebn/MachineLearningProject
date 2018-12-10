@@ -8,7 +8,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 sid = SentimentIntensityAnalyzer()
 
-def get_net_positivity(text):
+def get_net_compound(text):
         total_negative = 0
         total_neutral = 0
         total_compound = 0
@@ -36,19 +36,19 @@ datasets = ['reviews_Musical_Instruments_5.json.gz',
             #'reviews_Amazon_Instant_Video_5.json.gz']
 for d in datasets:
     for curr in TestBase.parse(location_base + d):
-        reviews[int(curr['overall'])-1].append(get_net_positivity(curr['reviewText']))
+        reviews[int(curr['overall'])-1].append(get_net_compound(curr['reviewText']))
 
-min = 0
-max = 0.3
-num_bins = 15
+min = -.3
+max = 0.5
+num_bins = 16
 tick_frequency = (max-min)/num_bins
 
 
 for i in range(5):
-    plt.hist([x[0] for x in reviews[i]], bins=num_bins, range=(min,max))
+    plt.hist([x[2] for x in reviews[i]], bins=num_bins, range=(min,max))
     plt.xticks(np.arange(min, max, tick_frequency))
-    plt.title("{} Star Sentence Negativity".format(i+1))
-    plt.xlabel('Sentence Negativity')
+    plt.title("{} Star Sentence Compound".format(i+1))
+    plt.xlabel('Sentence Compound')
     plt.show()
 
 #plt.xlabel('Sentence Neutrality (%)')
