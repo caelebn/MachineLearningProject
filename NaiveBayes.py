@@ -4,12 +4,16 @@ import gzip
 import io
 import os
 from collections import Counter
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 #  p(b|a) = p(a|b)*p(b)/p(a)
 #  p(stars | reviewData) = p(reviewData | stars) * p(stars) / p(reviewData)
 
 
-# guesses the review stars
+# guesses the review stars based off of the probabilities calculated from other functions
+# returns the star number with the highest probability
 def guess_stars(query, p_stars, p_review_from_stars, base_text_data):
     # p_text_of_query = get_p_text_of_query(query, base_text_data)
     p_text_of_query = base_text_data
@@ -31,7 +35,7 @@ def guess_stars(query, p_stars, p_review_from_stars, base_text_data):
     # p5 = float(float(overall_p * p_stars[4]) / abs(p_review_from_stars[4]))
 
     guess_list = [p1, p2, p3, p4, p5]
-    # print(guess_list)
+    print(guess_list)
     guess_list = sorted(guess_list)
     return_val = 0
     if guess_list[4] == p1:
@@ -78,7 +82,9 @@ def find_base_star_probabilities(reviews):
     return p1, p2, p3, p4, p5  # p(stars)
 
 
-# finds the probability of each review point
+# finds the probability of each review point given a set of reviews and a query
+# accomplishes this by counting the total number of reviews (including query) with the same text points as the query
+#   then divides this number by the total number of reviews
 def find_base_text_probability(query, reviews):
     l_uppercase = []
     l_polarity = []
@@ -121,85 +127,48 @@ def find_base_text_probability(query, reviews):
             # print('K = ', k)
             break
 
-
-    # probs_uppercase = []
-    # probs_polarity = []
-    # probs_richness = []
-
-    # for k, v in unique_uppercase.items():
-    #     prob_elem = float(v / len(l_uppercase))
-    #     print(k, ' ', prob_elem)
-    #     probs_uppercase.append((k, prob_elem))
-    #
-    # for k, v in unique_polarity.items():
-    #     prob_elem = float(v / len(l_polarity))
-    #     print(k, ' ', prob_elem)
-    #     probs_polarity.append((k, prob_elem))
-    #
-    # for k, v in unique_richness.items():
-    #     prob_elem = float(v / len(l_richness))
-    #     print(k, ' ', prob_elem)
-    #     probs_richness.append((k, prob_elem))
-
-    # return probs_uppercase, probs_polarity, probs_richness
     return p_upper, p_pol, p_rich
 
-# finds the probability of query text data points
-def get_p_text_of_query(query, base_text_data):
-    probs_uppercase = base_text_data[0]
-    probs_polarity = base_text_data[1]
-    probs_richness = base_text_data[2]
 
-    q_uppercase = query.get_raw_points()[0]
-    q_polarity = query.get_raw_points()[1]
-    q_richness = query.get_raw_points()[2]
-
-    shortest_dist = 999999
-    closest_index = 0
-    for i in range(0, len(probs_uppercase)):
-        current_val = abs(q_uppercase - probs_uppercase[i][0]) + abs(q_polarity - probs_polarity[i][0]) + \
-                      abs(q_richness - probs_richness[i][0])
-        if current_val < shortest_dist:
-            closest_index = i
-            shortest_dist = current_val
-    # print('SHORTEST DISTANCE = ', shortest_dist)
-    return probs_uppercase[closest_index][1], probs_polarity[closest_index][1], probs_richness[closest_index][1]
-
-
-# finds the probability of review data occurring given the number of stars
-def find_p_reviewdata_given_star(query, reviews):
-    tot_uppercase = [0, 0, 0, 0, 0]  # one, two, three, four, five star
-    tot_polarity = [0, 0, 0, 0, 0]
-    tot_richness = [0, 0, 0, 0, 0]
-    tots = [0, 0, 0, 0, 0]  # number of each review
+# calculates the probability of text given the number of stars
+#   calls the find_base_text_probability function on lists of reviews of a particular star
+#   returns a list of probabilities of each star type
+def get_ptext_given_stars(query, reviews):
+    r1 = []
+    r2 = []
+    r3 = []
+    r4 = []
+    r5 = []
 
     for r in reviews:
-        index = r.get_overall() - 1
-        up = r.get_raw_points()[0]
-        pol = r.get_raw_points()[1]
-        rich = r.get_raw_points()[2]
-        tot_uppercase[index] += up
-        tot_polarity[index] += pol
-        tot_richness[index] += rich
-        tots[index] += up + abs(pol) + rich
+        if r.get_overall() == 1:
+            r1.append(r)
+        elif r.get_overall() == 2:
+            r2.append(r)
+        elif r.get_overall() == 3:
+            r3.append(r)
+        elif r.get_overall() == 4:
+            r4.append(r)
+        else:
+            r5.append(r)
 
-    q_points = query.get_raw_points()
-    q_tot = q_points[0] + q_points[1] + q_points[2]
+    t1 = find_base_text_probability(query, r1)
+    t2 = find_base_text_probability(query, r2)
+    t3 = find_base_text_probability(query, r3)
+    t4 = find_base_text_probability(query, r4)
+    t5 = find_base_text_probability(query, r5)
 
-    p1 = float(float(tot_uppercase[0] / tots[0]) *
-               float(tot_polarity[0] / tots[0]) * float(tot_richness[0] / tots[0])) * q_tot
+    # p1 = t1[0] + t1[1] + t1[2]
+    # p2 = t2[0] + t2[1] + t2[2]
+    # p3 = t3[0] + t3[1] + t3[2]
+    # p4 = t4[0] + t4[1] + t4[2]
+    # p5 = t5[0] + t5[1] + t5[2]
 
-    p2 = float(float(tot_uppercase[1] / tots[1]) *
-               float(tot_polarity[1] / tots[1]) * float(tot_richness[1] / tots[1])) * q_tot
-
-    p3 = float(float(tot_uppercase[2] / tots[2]) *
-               float(tot_polarity[2] / tots[2]) * float(tot_richness[2] / tots[2])) * q_tot
-
-    p4 = float(float(tot_uppercase[3] / tots[3]) *
-               float(tot_polarity[3] / tots[3]) * float(tot_richness[3] / tots[3])) * q_tot
-
-    p5 = float(float(tot_uppercase[4] / tots[4]) *
-               float(tot_polarity[4] / tots[4]) * float(tot_richness[4] / tots[4])) * q_tot
+    p1 = t1[0] * t1[1] * t1[2]
+    p2 = t2[0] * t2[1] * t2[2]
+    p3 = t3[0] * t3[1] * t3[2]
+    p4 = t4[0] * t4[1] * t4[2]
+    p5 = t5[0] * t5[1] * t5[2]
 
     return p1, p2, p3, p4, p5
 
@@ -207,6 +176,7 @@ def find_p_reviewdata_given_star(query, reviews):
 path = 'Datasets/reviews_Automotive_5.json.gz'
 
 
+# used to parse a gzip file
 def parse(p):
     gz = gzip.open(p, 'rb')
     f = io.BufferedReader(gz)
@@ -325,6 +295,21 @@ def gen_even_list(reviews):
     return n_revs
 
 
+# used to plot the final confusion matrix
+def plot_confusion_matrix(con_mat, title='NB Confusion Matrix', cmap=plt.cm.gray_r):
+    plt.matshow(con_mat, cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(con_mat.columns))
+    plt.xticks(tick_marks, con_mat.columns, rotation=45)
+    plt.yticks(tick_marks, con_mat.index)
+    plt.tight_layout()
+    plt.ylabel(con_mat.index.name)
+    plt.xlabel(con_mat.columns.name)
+    plt.show()
+
+
+# runs a number of reviews (num_data_points) from a query list using base data list (datapath)
 def main(qPath, datapath, num_data_points):
     load = input('Load review data? [y/n]')
     if load.upper()[0] == 'N' or not os.path.isfile('Datasets/tuple_dataNB.pkl'):
@@ -341,16 +326,29 @@ def main(qPath, datapath, num_data_points):
 
     p_stars = find_base_star_probabilities(reviews)
 
+    reviews = gen_even_list(reviews) # makes reviews even number of each star
+
     correctness = [0, 0, 0, 0, 0]
+    guesses = [0, 0, 0, 0, 0]
+    g_list = []
+    a_list = []
     counter = 0
     for q in parse(qPath):
         print('Guessing query #', counter)
         query = Review.Query(q['reviewText'])
         p_text = find_base_text_probability(query, reviews)
-        p_review_from_stars = find_p_reviewdata_given_star(query, reviews)
+        # p_review_from_stars = find_p_reviewdata_given_star(query, reviews)
+        p_review_from_stars = get_ptext_given_stars(query, reviews)
+        print('P(Review | Stars) = ', p_review_from_stars)
         guess = guess_stars(query, p_stars, p_review_from_stars, p_text)
+        print('GUESS: ', guess)
+
+        guesses[int(guess-1)] += 1
 
         actual = int(q['overall'])
+
+        g_list.append(guess)
+        a_list.append(actual)
 
         index = abs(int(guess) - int(actual))
         correctness[index] += 1
@@ -359,10 +357,22 @@ def main(qPath, datapath, num_data_points):
         if counter >= num_data_points:
             break
 
-    print('Correctness List: (0 off, 1 off, 2 off, 3 off, 4 off = ')
+    print('Correctness List: 0 off, 1 off, 2 off, 3 off, 4 off = ')
     print('\t', correctness)
 
+    print('Guesses List: 1, 2, 3, 4, 5')
+    print('\t', guesses)
 
+    pred = pd.Series(g_list, name='Predicted')
+    actu = pd.Series(a_list, name='Actual')
+
+    df_confusion = pd.crosstab(actu, pred, rownames=['Actual'], colnames=['Predicted'], margins=True)
+
+    print(df_confusion)
+    plot_confusion_matrix(df_confusion)
+
+
+# used to test a single inputted query
 def enter_one_query(datapath):
     load = input('Load data? [y/n]')
     if load.upper() == 'N':
@@ -377,21 +387,21 @@ def enter_one_query(datapath):
         reviews = pickle.load(f)
     f.close()
 
-    # reviews = gen_even_list(reviews)
+    reviews = gen_even_list(reviews)
 
     query = Review.Query((input('Enter text review: ')))
 
     p_stars = find_base_star_probabilities(reviews)
     p_text_data = find_base_text_probability(query, reviews)
-    p_review_from_stars = find_p_reviewdata_given_star(query, reviews)
+    p_review_from_stars = get_ptext_given_stars(query, reviews)
     print(p_review_from_stars)
     guess = guess_stars(query, p_stars, p_review_from_stars, p_text_data)
 
     print('GUESS: ', str(guess))
 
 
-q_Path = 'Datasets/reviews_Amazon_Instant_Video_5.json.gz'
-datapath = 'Datasets/reviews_Patio_Lawn_and_Garden_5.json.gz'
-max_num = 400
-# enter_one_query(datapath)
-main(q_Path, datapath, max_num)
+q_Path = 'Datasets/reviews_Musical_Instruments_5.json.gz'
+d = 'Datasets/reviews_Toys_and_Games_5.json.gz'
+max_num = 1500
+# enter_one_query(d)
+main(q_Path, d, max_num)
