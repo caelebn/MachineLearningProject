@@ -1,7 +1,5 @@
 # MachineLearningProject
-The end goal of this project is to have a Machine Learning system in place that is trained off of user reviews from Amazon
-to predict how many stars a user should give a product based off of their text review. To train the system and analyze an input,
-we are using the KNN (K-Nearest-Neighbor) algorithm.
+Here, we have implemented a K-Nearest-Neighbor (KNN) classifier and a Naive Bayes classifier that predict the amount of review stars a given text review should be assigned. The code for KNN can be found within the Master Branch, whereas the code for Naive Bayes can be found under caelebn branch, as we did not have sufficient time to merge everything. 
 
 Uses lists assembled from
 Minqing Hu and Bing Liu. "Mining and Summarizing Customer Reviews." 
